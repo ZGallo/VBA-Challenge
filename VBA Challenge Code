@@ -1,0 +1,151 @@
+Sub StockAnalysis():
+    
+    ' Looping through all of the worksheets
+    Dim Ws As Integer
+    
+    For Ws = 1 To Sheets.Count
+        Sheets(Ws).Activate
+        
+        LastRow = Cells(Rows.Count, 1).End(xlUp).Row
+        
+        ' Defining titles for 1st aggregate table
+        Cells(1, 9).Value = "Ticker"
+        Cells(1, 10).Value = "Yearly Change"
+        Cells(1, 11).Value = "Percent Change"
+        Cells(1, 12).Value = "Total Stock Volume"
+
+        ' Define titles for challenges table
+        Cells(1, 16).Value = "Ticker"
+        Cells(1, 17).Value = "Value"
+        Cells(2, 15).Value = "Greatest % Increase"
+        Cells(3, 15).Value = "Greatest % Decrease"
+        Cells(4, 15).Value = "Greatest Total Volume"
+
+        ' Defining Challenge variables
+        Dim greatestIncrease, greatestDecrease, greatestStockVol As Double
+        
+        greatestIncrease = 0
+        greatestDecrease = 0
+        greatestStockVol = 0
+        
+        '''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
+        
+        ' Defining variables
+        Dim i, tickerCount As Long
+        Dim openStock, yearlyChange, PercentChange, stockVol As Double
+        
+        tickerCount = 0
+        openValue = Cells(2, 3).Value
+        stockVol = 0
+        
+        ' Loop for all Rows within a WorkSheet
+        For i = 2 To LastRow
+            Ticker = Cells(i, 1).Value
+                       
+            ' Check if next stock is the same
+            ' And Add following stock volume
+                        
+            If Ticker = Cells(i + 1, 1).Value Then
+            
+                ' Stock volumen within the same ticker
+                  stockVol = stockVol + Cells(i, 7).Value
+            
+            ' Condition to check if the following row is for a new stock
+            ElseIf Ticker <> Cells(i + 1, 1).Value Then
+                            
+                  
+                  ' Add ticker name to column "I"
+                  Cells(2 + tickerCount, 9).Value = Ticker
+                
+                  ' Calculate Yearly Change and print to column "J"
+                  closeValue = Cells(i, 6).Value
+                  yearlyChange = closeValue - openValue
+                  Cells(2 + tickerCount, 10).Value = yearlyChange
+                
+                  ' Condition to colour YearlyChange
+                  If Cells(2 + tickerCount, 10).Value < 0 Then
+                     Cells(2 + tickerCount, 10).Interior.ColorIndex = 3
+                  
+                  Else:
+                      Cells(2 + tickerCount, 10).Interior.ColorIndex = 4
+                  
+                  End If
+                  
+                  ' Calculate percentage change, handle division by zero and print to column "K"
+                  If openValue = 0 Then
+                    Cells(2 + tickerCount, 11).Value = 0
+                    
+                  Else:
+                    PercentChange = closeValue / openValue - 1
+                    Cells(2 + tickerCount, 11).Value = PercentChange
+                  
+                  End If
+                  
+                  ' Track rows in aggregate table
+                  tickerCount = tickerCount + 1
+                  
+                  ' Addin the last StockVolume cell to StockVol and print it in column "L"
+                  stockVol = stockVol + Cells(i, 7).Value
+                  Cells(2 + tickerCount, 12).Value = stockVol
+                  
+                  ' Reset openValue
+                  openValue = Cells(i + 1, 3)
+                  
+                  'Convert all values in column K to strings and add % simbol
+                  stepValue = Cells(i, 11).Value
+                  convertedValue = Str(stepValue) + "%"
+                  Cells(i, 11).Value = convertedValue
+                  
+                  
+                  ''''''''''''''''''''''''''''''''''''''''
+                  '                CHALLENGE             '
+                  ''''''''''''''''''''''''''''''''''''''''
+                  
+                  ' Greatest % Increase
+                  ' Condition to check greates percent change
+                  If PercentChange > greatestIncrease Then
+                    greatestIncrease = PercentChange
+                
+                    'Print greatest Increase ticker
+                    Cells(2, 16).Value = Cells(i, 1).Value
+                
+                    'Print greatest Increase value
+                    Cells(2, 17).Value = greatestIncrease * 100 & "%"
+                    
+                  End If
+                                          
+                  ' Greatest % Decrease
+                  ' Condition to check smallest value
+                  If PercentChange < greatestDecrease Then
+                    greatestDecrease = PercentChange
+                
+                    'Print greatest Increase ticker
+                    Cells(3, 16).Value = Cells(i, 1).Value
+                
+                    'Print greatest Increase value
+                    Cells(3, 17).Value = greatestDecrease * 100 & "%"
+                  
+                  End If
+                                   
+                  ' Greatest Total Volume
+                  If stockVol > greatestStockVol Then
+                    greatestStockVol = stockVol
+                    
+                    ' Print greatest total volume ticker
+                    Cells(4, 16).Value = Cells(i, 1).Value
+                    
+                    ' Print greatest total volume ticker
+                    Cells(4, 17).Value = greatestStockVol
+                    
+                  End If
+            
+                  ' Reset stock volume
+                  stockVol = 0
+            
+            End If
+        
+        Next i
+
+    Next Ws
+        
+End Sub
